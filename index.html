@@ -158,12 +158,93 @@ psql -c "SELECT * FROM users;"  -- Thực thi truy vấn SQL</code></pre>
       <pre><code>psql -f data-lab-day02.sql -U postgres -d prod -p 5432</code></pre>
   </ol>
 
-  <!-- Navigation Links -->
-  <nav>
-      <h3>Điều hướng</h3>
-      <a href="buoi_hoc_1.html" class="btn">Buổi Học 1</a>
-      <a href="buoi_hoc_2.html" class="btn">Buổi Học 2</a>
-      <a href="buoi_hoc_3.html" class="btn">Buổi Học 3</a>
-  </nav>
-</body>
-</html>
+  <h2>Tài Liệu Quản Lý Cụm Cơ Sở Dữ Liệu PostgreSQL</h2>
+  
+  <h3>1. Cụm Cơ Sở Dữ Liệu (Database Cluster)</h3>
+  <p>Khái niệm: Cụm cơ sở dữ liệu (Database Cluster) là tập hợp các cơ sở dữ liệu được quản lý bởi một instance máy chủ duy nhất. Nó chứa các cơ sở dữ liệu (databases), các tệp dữ liệu, cấu hình, và các tài nguyên cần thiết cho hệ thống cơ sở dữ liệu hoạt động.</p>
+  
+  <h4>Các thành phần của Cụm Cơ Sở Dữ Liệu:</h4>
+  <ul>
+      <li><strong>Thư mục dữ liệu (Data Directory)</strong>: Là nơi PostgreSQL lưu trữ tất cả các tệp dữ liệu cơ sở dữ liệu, cấu hình, và các tệp nhật ký WAL.</li>
+      <li><strong>Cổng (Port)</strong>: Mỗi cụm cơ sở dữ liệu PostgreSQL sẽ lắng nghe trên một cổng mạng cụ thể (mặc định là 5432).</li>
+      <li><strong>Các cơ sở dữ liệu mặc định:</strong>
+          <ul>
+              <li><code>template0</code>: Cơ sở dữ liệu mẫu không thể thay đổi.</li>
+              <li><code>template1</code>: Cơ sở dữ liệu mẫu có thể thay đổi để tạo các cơ sở dữ liệu mới.</li>
+              <li><code>postgres</code>: Cơ sở dữ liệu mặc định cho người dùng postgres.</li>
+          </ul>
+      </li>
+  </ul>
+
+  <h3>2. Tạo Cụm Cơ Sở Dữ Liệu</h3>
+  <p>Chọn Vị trí Thư Mục Dữ Liệu: Trước khi khởi tạo cụm cơ sở dữ liệu, bạn cần chọn vị trí thư mục dữ liệu, nơi sẽ lưu trữ các tệp của cơ sở dữ liệu.</p>
+  <p><strong>Lưu ý:</strong> Bạn phải có quyền ghi vào thư mục này.</p>
+  <p>Khởi tạo Không gian Lưu trữ của Cụm Cơ Sở Dữ Liệu:</p>
+  <p>Sử dụng công cụ <code>initdb</code> để tạo thư mục dữ liệu và cấu hình cơ sở dữ liệu. <code>initdb</code> tạo ra các cấu trúc dữ liệu cần thiết và các cơ sở dữ liệu mẫu.</p>
+  <p>Câu lệnh khởi tạo <code>initdb</code>:</p>
+  <pre><code>$ initdb -D /data --wal-segsize 1024 -W</code></pre>
+  <ul>
+      <li><code>-D</code>: Chỉ định thư mục dữ liệu của cụm cơ sở dữ liệu (Ví dụ: /data).</li>
+      <li><code>--wal-segsize</code>: Xác định kích thước của mỗi phân đoạn WAL (Write-Ahead Log) trong đơn vị megabyte. Giá trị mặc định là 16 MB, nhưng trong ví dụ này, chúng ta chọn 1024 MB.</li>
+      <li><code>-W</code>: Yêu cầu nhập mật khẩu cho superuser (postgres), giúp bảo mật hệ thống khi khởi tạo.</li>
+  </ul>
+  <p><strong>Giải thích các bước khởi tạo:</strong></p>
+  <ul>
+      <li>Thư mục dữ liệu /data sẽ được tạo (nếu chưa tồn tại).</li>
+      <li>Các cơ sở dữ liệu mặc định (template0, template1, postgres) sẽ được tạo.</li>
+      <li>Tất cả cấu trúc dữ liệu ban đầu như bảng, chỉ mục sẽ được tạo trong thư mục dữ liệu.</li>
+  </ul>
+
+  <h3>3. Khởi Động và Dừng Cụm Cơ Sở Dữ Liệu</h3>
+  <h4>Khởi động Cụm Cơ Sở Dữ Liệu:</h4>
+  <p>Sau khi khởi tạo xong, bạn cần khởi động máy chủ PostgreSQL.</p>
+  <p>Câu lệnh khởi động máy chủ PostgreSQL:</p>
+  <pre><code>$ pg_ctl -D /data/ -l /data/startlog start</code></pre>
+  <ul>
+      <li><code>-D</code>: Chỉ định thư mục dữ liệu nơi PostgreSQL lưu trữ tất cả các tệp (Ví dụ: /data/).</li>
+      <li><code>-l</code>: Xác định tệp log sẽ lưu lại thông tin khởi động máy chủ (Ví dụ: /data/startlog).</li>
+  </ul>
+  <p><strong>Kết quả:</strong> Máy chủ PostgreSQL sẽ bắt đầu và sẵn sàng nhận kết nối từ các ứng dụng khác.</p>
+  <p>Kiểm tra trạng thái của máy chủ:</p>
+  <pre><code>$ pg_ctl -D /data/ status</code></pre>
+  <p><strong>Kết quả:</strong> Nếu máy chủ đang chạy, bạn sẽ thấy PID (Process ID) của PostgreSQL.</p>
+
+  <h4>Dừng Cụm Cơ Sở Dữ Liệu:</h4>
+  <p>PostgreSQL hỗ trợ ba chế độ dừng máy chủ:</p>
+  <ul>
+      <li><code>smart</code>: Đợi cho tất cả các kết nối client ngắt kết nối trước khi tắt máy chủ.</li>
+      <li><code>fast</code>: Tắt máy chủ mà không cần đợi kết nối client.</li>
+      <li><code>immediate</code>: Dừng ngay lập tức mà không cần tắt máy chủ đúng cách, có thể gây phải phục hồi khi khởi động lại.</li>
+  </ul>
+  <p>Câu lệnh dừng máy chủ PostgreSQL:</p>
+  <pre><code>$ pg_ctl -D /data/ stop</code></pre>
+  <p><strong>Lưu ý:</strong> Trước khi dừng máy chủ, đảm bảo rằng không có truy cập quan trọng nào đến cơ sở dữ liệu.</p>
+
+  <h3>4. Kết Nối với Cụm Cơ Sở Dữ Liệu</h3>
+  <p>Kết nối đến Cụm Cơ Sở Dữ Liệu bằng công cụ psql:</p>
+  <p>Câu lệnh kết nối đến cơ sở dữ liệu PostgreSQL:</p>
+  <pre><code>$ psql -p 5432 -d postgres -U postgres</code></pre>
+  <ul>
+      <li><code>-p 5432</code>: Chỉ định cổng (Port) mà máy chủ PostgreSQL đang lắng nghe (mặc định là 5432).</li>
+      <li><code>-d postgres</code>: Chỉ định cơ sở dữ liệu mà bạn muốn kết nối (trong ví dụ này là postgres).</li>
+      <li><code>-U postgres</code>: Chỉ định người dùng (user) để kết nối, trong ví dụ này là postgres.</li>
+  </ul>
+  <p>Các lệnh trong psql:</p>
+  <ul>
+      <li><code>show port;</code> - Hiển thị cổng đang sử dụng.</li>
+      <li><code>show data_directory;</code> - Hiển thị thư mục dữ liệu của cơ sở dữ liệu.</li>
+  </ul>
+  <p>Câu lệnh thoát psql:</p>
+  <pre><code>\q</code></pre>
+
+  <h3>5. Tải Lại Cấu Hình của Cụm Cơ Sở Dữ Liệu</h3>
+  <p>Một số thay đổi cấu hình không yêu cầu khởi động lại máy chủ, nhưng có thể được tải lại mà không cần dừng máy chủ.</p>
+  <p>Sử dụng công cụ <code>pg_ctl reload</code> hoặc lệnh <code>pg_reload_conf()</code> trong SQL để tải lại các thay đổi cấu hình.</p>
+  <p>Câu lệnh tải lại cấu hình:</p>
+  <pre><code>$ pg_ctl reload -D /data/ -s</code></pre>
+  <ul>
+      <li><code>-D</code>: Chỉ định thư mục dữ liệu của cụm cơ sở dữ liệu.</li>
+      <li><code>-s</code>: Chỉ in ra thông báo lỗi, không hiển thị thông tin chi tiết.</li>
+  </ul>
+
+  <h3>6. Xem Thông Tin Kiểm Soát Cụm Cơ Sở Dữ

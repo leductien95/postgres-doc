@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng dẫn Sử dụng psql với Ví dụ</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          margin: 20px;
+      }
+      h1, h2, h3 {
+          color: #333;
+      }
+      code {
+          background-color: #f4f4f4;
+          padding: 2px 4px;
+          border-radius: 4px;
+      }
+      pre {
+          background-color: #f4f4f4;
+          padding: 10px;
+          border-radius: 4px;
+          overflow-x: auto;
+      }
+  </style>
+</head>
+<body>
+  <h1>Hướng dẫn Sử dụng psql với Ví dụ</h1>
+
+  <h2>Giới thiệu về psql</h2>
+  <p><strong>psql</strong> là một giao diện dòng lệnh (CLI) cho PostgreSQL, cho phép thực thi các truy vấn SQL và các lệnh meta của psql.</p>
+  <pre><code>[postgres@Base ~]$ psql -h localhost -p 5432 -U postgres -d postgres
+Type "help" for help. 
+postgres=# \q</code></pre>
+
+  <h2>Kết nối với Cơ sở dữ liệu</h2>
+  <p>Các tùy chọn kết nối psql:</p>
+  <ul>
+      <li><code>-d &lt;Tên Cơ sở dữ liệu&gt;</code>: Tên cơ sở dữ liệu mà bạn muốn kết nối.</li>
+      <li><code>-h &lt;Tên máy chủ&gt;</code>: Tên máy chủ nơi cơ sở dữ liệu đang chạy.</li>
+      <li><code>-p &lt;Cổng Cơ sở dữ liệu&gt;</code>: Cổng mà cơ sở dữ liệu lắng nghe (mặc định là 5432).</li>
+      <li><code>-U &lt;Tên người dùng Cơ sở dữ liệu&gt;</code>: Tên người dùng để đăng nhập vào cơ sở dữ liệu.</li>
+  </ul>
+  <p>Ví dụ:</p>
+  <pre><code>psql -h localhost -p 5432 -U postgres -d mydatabase</code></pre>
+
+  <h2>Biến Môi trường</h2>
+  <p>Các biến môi trường bao gồm: <code>PGDATABASE</code>, <code>PGHOST</code>, <code>PGPORT</code>, và <code>PGUSER</code>.</p>
+  <p>Ví dụ:</p>
+  <pre><code>export PGDATABASE=mydatabase
+export PGUSER=postgres</code></pre>
+
+  <h2>Lệnh Meta-Commands psql</h2>
+  <p>psql có tập hợp các lệnh riêng, tất cả đều bắt đầu bằng dấu gạch chéo ngược (<code>\</code>).</p>
+  <p>Một số lệnh chấp nhận mẫu regex, với các ký tự đại diện như <code>*</code> và <code>?</code>. Dấu ngoặc kép được sử dụng để chỉ định tên chính xác.</p>
+  <p>Ví dụ:</p>
+  <pre><code>\dt   -- Liệt kê tất cả các bảng
+\dt users*  -- Liệt kê các bảng bắt đầu bằng "users"</code></pre>
+
+  <h2>Thực thi Lệnh và Tùy chọn</h2>
+  <ul>
+      <li><code>-f FILENAME</code>: Thực thi các lệnh trong tệp và sau đó thoát.</li>
+      <li><code>-c COMMAND</code>: Thực thi lệnh và sau đó thoát.</li>
+      <li><code>--help</code>: Hiển thị tất cả các tùy chọn khởi động.</li>
+      <li><code>--version</code>: Hiển thị thông tin phiên bản.</li>
+  </ul>
+  <p>Ví dụ:</p>
+  <pre><code>psql -f script.sql  -- Thực thi tệp script.sql
+psql -c "SELECT * FROM users;"  -- Thực thi truy vấn SQL</code></pre>
+
+  <h2>Chỉnh sửa Dòng lệnh</h2>
+  <p>psql sử dụng khả năng chỉnh sửa dòng lệnh có sẵn trong hệ điều hành:</p>
+  <ul>
+      <li>Phím mũi tên lên/xuống để duyệt lịch sử lệnh.</li>
+      <li>Tự động hoàn thành bằng phím tab.</li>
+      <li><code>\s</code>: Hiển thị lịch sử lệnh.</li>
+      <li><code>\e</code>: Chỉnh sửa bộ đệm truy vấn.</li>
+      <li><code>\w FILENAME</code>: Lưu bộ đệm truy vấn vào tệp.</li>
+  </ul>
+  <p>Ví dụ:</p>
+  <pre><code>\e  -- Chỉnh sửa bộ đệm truy vấn hiện tại
+\w my_query.sql  -- Lưu bộ đệm truy vấn vào my_query.sql</code></pre>
+
+  <h2>Thay thế Biến</h2>
+  <p>psql cung cấp khả năng thay thế biến:</p>
+  <pre><code>\set city Edmonton
+\echo :city</code></pre>
+  <p>Kết quả: Edmonton</p>
+  <pre><code>\unset city</code></pre>
+
+  <h2>Các Lệnh Điều kiện</h2>
+  <p>Các lệnh điều kiện hữu ích cho lập trình kịch bản:</p>
+  <pre><code>\if EXPR
+\elif EXPR
+\else
+\endif</code></pre>
+  <p>Ví dụ:</p>
+  <pre><code>\if :city = 'Edmonton'
+  \echo "City is Edmonton"
+\endif</code></pre>
+
+  <h2>Các Lệnh Thông tin</h2>
+  <p>Các lệnh thông tin cơ bản:</p>
+  <ul>
+      <li><code>\d[(i|s|t|v|b|S)][+] [pattern]</code>: Danh sách các đối tượng.</li>
+      <li><code>\l[ist][+]</code>: Liệt kê các cơ sở dữ liệu.</li>
+      <li><code>\dn+ [pattern]</code>: Liệt kê các schema.</li>
+      <li><code>\df[+] [pattern]</code>: Liệt kê các hàm.</li>
+      <li><code>\q</code>: Thoát khỏi psql.</li>
+      <li><code>\cd [directory]</code>: Thay đổi thư mục làm việc hiện tại.</li>
+      <li><code>! [command]</code>: Thực thi lệnh hệ thống.</li>
+      <li><code>\conninfo</code>: Thông tin kết nối hiện tại.</li>
+      <li><code>?</code>: Hiển thị thông tin trợ giúp về các lệnh psql.</li>
+      <li><code>\h [command]</code>: Hiển thị thông tin về các lệnh SQL.</li>
+  </ul>
+  <p>Ví dụ:</p>
+  <pre><code>\d users  -- Mô tả bảng "users"
+\l  -- Liệt kê tất cả các cơ sở dữ liệu</code></pre>
+
+  <h2>Hướng dẫn Thực hiện</h2>
+  <p>Trong khóa học này, <code>data-lab-day02.sql</code> cung cấp tài liệu đào tạo. Các bước thực hiện:</p>
+  <ol>
+      <li>Tải xuống <code>data-lab-day02.sql</code> và đặt vào thư mục mà người dùng postgres có thể truy cập.</li>
+      <li>Thay đổi phương thức xác thực thành <code>scram-sha-256</code> trong <code>pg_hba.conf</code>.</li>
+      <li>Chạy lệnh psql với tùy chọn <code>-f</code> để thực thi tệp:</li>
+      <pre><code>psql -f data-lab-day02.sql -U postgres -d prod -p 5432</code></pre>
+  </ol>
+</body>
+</html>
